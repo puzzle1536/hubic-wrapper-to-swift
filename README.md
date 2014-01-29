@@ -76,14 +76,17 @@ followed by the hubic API name :
 
 If you want to perform a POST request, you can add "url-encoded" data with
 "--data" switch :
+
     $ ./hubic.py --post /account/links --data "comment=none&container=default&mode=ro&ttl=1&type=file&uri=%2Fmyshare.txt"
 
 ### Display currently used environment variables
 This is useful if you encounter auth issues.
+
     $ ./hubic -v
 
 ### Use the swift client to access Hubic OpenStack 
 This program can act as a proxy to swift client.
+
     $ ./hubic --swift -- list default
 
 All parameters provided after "--" are forwarded to swift client.  If
