@@ -19,7 +19,7 @@ swift, python, python-libxml2, python-requests
 You must register an application in your hubic account to access the hubic API
 https://hubic.com/home/browser/developers/
 
-You will need a valid `client_id`, `client_secret` and 'redirect_uri`.
+You will need a valid `client_id`, `client_secret` and `redirect_uri`.
 
 redirect_uri can be any url accepted by OVH. This program does not actually
 perform any connection to this url. If you don't know, use:
@@ -27,20 +27,20 @@ http://localhost:8080/
 
 Use
 ---
-0. Get complete function list
- $ ./hubic.py --help
+### Get complete function list
+> $ ./hubic.py --help
 
-1. Request an access new token
- $ ./hubic.py --token
+### Request an access new token
+> $ ./hubic.py --token
 
 If not provided as environment variables or as command line arguments, the
 program will request application and user credentials :
 
- HUBIC_CLIENT_ID=api_hubic_4b1dee31565ff182f98a05882fffbc8e
- HUBIC_CLIENT_SECRET=95f642cfce603f2430c23a4106ce8ea55d85a972
- HUBIC_CLIENT_REDIRECT_URI=http://localhost/
- HUBIC_USERNAME=my_hubic
- HUBIC_PASSWORD=my_hubic_password
+> HUBIC_CLIENT_ID=api_hubic_4b1dee31565ff182f98a05882fffbc8e
+> HUBIC_CLIENT_SECRET=95f642cfce603f2430c23a4106ce8ea55d85a972
+> HUBIC_CLIENT_REDIRECT_URI=http://localhost/
+> HUBIC_USERNAME=my_hubic
+> HUBIC_PASSWORD=my_hubic_password
 
 Please use these above variable names but replace values with your own
 credentials.
@@ -48,43 +48,43 @@ credentials.
 hubic.py will then perform all authentification steps.
 If succeed, you will get your own access and refresh token to the hubic API.
 
- HUBIC_ACCESS_TOKEN=c9225cbbfe25ec72892e34ac3c6e61c3ee6b5c9259bd0a77e93128dfc1a135fb
- HUBIC_REFRESH_TOKEN=994fdf7deeb336988931a2df8602eb1cbe196b837fb02946d2b3d066082e1762
+> HUBIC_ACCESS_TOKEN=c9225cbbfe25ec72892e34ac3c6e61c3ee6b5c9259bd0a77e93128dfc1a135fb
+> HUBIC_REFRESH_TOKEN=994fdf7deeb336988931a2df8602eb1cbe196b837fb02946d2b3d066082e1762
 
 Add them to your environment so the program won't need to authentify again :
 
- export HUBIC_ACCESS_TOKEN=c9225cbbfe25ec72892e34ac3c6e61c3ee6b5c9259bd0a77e93128dfc1a135fb
- export HUBIC_REFRESH_TOKEN=994fdf7deeb336988931a2df8602eb1cbe196b837fb02946d2b3d066082e1762
+> export HUBIC_ACCESS_TOKEN=c9225cbbfe25ec72892e34ac3c6e61c3ee6b5c9259bd0a77e93128dfc1a135fb
+> export HUBIC_REFRESH_TOKEN=994fdf7deeb336988931a2df8602eb1cbe196b837fb02946d2b3d066082e1762
 
-2. Request a new access token
+### Request a new access token
 Access token have a limited lifetime. You can get a new access token with your
 refresh token:
 
- $ ./hubic.py --refresh
- HUBIC_ACCESS_TOKEN=b27245709f8cf1a2b81326a43bda140356b9836b55a232e15c34c50eac7bee87
+> $ ./hubic.py --refresh
+> HUBIC_ACCESS_TOKEN=b27245709f8cf1a2b81326a43bda140356b9836b55a232e15c34c50eac7bee87
 
 Update your HUBIC_ACCESS_TOKEN environment variable accordingly.
 
-3. Request hubic API.
+### Request hubic API.
 The complete list of hubic API is available here : https://api.hubic.com/console/
 
 To access hubic API, just specify the type of request (--get, --post, --delete)
 followed by the hubic API name :
 
- $ ./hubic.py --get /account
-{"email":"mymail@gmail.com","firstname":"MyFirstName","activated":true,"creationDate":"2013-04-04T12:45:36+01:00","language":"en","status":"ok","offer":"25g","lastname":"MyLastName"}
+> $ ./hubic.py --get /account
+> {"email":"mymail@gmail.com","firstname":"MyFirstName","activated":true,"creationDate":"2013-04-04T12:45:36+01:00","language":"en","status":"ok","offer":"25g","lastname":"MyLastName"}
 
 If you want to perform a POST request, you can add "url-encoded" data with
 "--data" switch :
- $ ./hubic.py --post /account/links --data "comment=none&container=default&mode=ro&ttl=1&type=file&uri=%2Fmyshare.txt"
+> $ ./hubic.py --post /account/links --data "comment=none&container=default&mode=ro&ttl=1&type=file&uri=%2Fmyshare.txt"
 
-4. Display currently used environment variables
+### Display currently used environment variables
 This is useful if you encounter auth issues.
- $ ./hubic -v
+> $ ./hubic -v
 
-5. Use the swift client to access Hubic OpenStack 
+### Use the swift client to access Hubic OpenStack 
 This program can act as a proxy to swift client.
- $ ./hubic --swift -- list default
+> $ ./hubic --swift -- list default
 
 All parameters provided after "--" are forwarded to swift client.  If
 OS_AUTH_TOKEN and OS_STORAGE_URL are not already provided in the environment,
