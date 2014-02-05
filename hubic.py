@@ -21,12 +21,14 @@ import libxml2
 import subprocess
 import sys
 import os
+import ConfigParser
 
 from urlparse import parse_qsl, urlparse
 from urllib import urlencode
 from optparse import OptionParser, OptionGroup
 from requests.auth import HTTPBasicAuth
 from getpass import getpass
+from stat import S_IRUSR, S_IWUSR
 
 class HTTPBearerAuth(requests.auth.AuthBase):
     def __init__(self, token):
@@ -43,91 +45,172 @@ class hubic:
         if options.verbose:
             print "-- Load environment hubic credentials:"
 
-        # Load existing environment variables
-        if options.hubic_client_id:
-            self.client_id = options.hubic_client_id
+        # Load existing hubic config
+        if options.config and os.path.exists(options.config):
+            self.config = options.config
         else:
-            self.client_id     = os.environ.get('HUBIC_CLIENT_ID', 'None')
-        if options.verbose and self.client_id != 'None':
-            print "HUBIC_CLIENT_ID=%s"      % self.client_id      
+            self.config = os.path.expanduser('~/.hubic.cfg')
 
-        if options.hubic_client_secret:
-            self.client_secret = options.hubic_client_secret
-        else:
-            self.client_secret = os.environ.get('HUBIC_CLIENT_SECRET', 'None')
-        if options.verbose and self.client_secret != 'None':
-            print "HUBIC_CLIENT_SECRET=%s"  % self.client_secret  
+        try:
+            config = ConfigParser.ConfigParser()
+            config.read(self.config)
+        except ConfigParser.ParsingError:
+            print "Cannot read config file %s" % self.config
+            sys.exit(1)
+        
+        # Load hubic client_id
+        try:
+            self.client_id = config.get('hubic', 'client_id')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.hubic_client_id:
+                self.client_id = options.hubic_client_id
+            else:
+                self.client_id = os.environ.get('HUBIC_CLIENT_ID', None)
 
-        if options.hubic_redirect_uri:
-            self.redirect_uri = options.hubic_redirect_uri
-        else:
-            self.redirect_uri  = os.environ.get('HUBIC_REDIRECT_URI', 'None')
-        if options.verbose and self.redirect_uri != 'None':
-            print "HUBIC_REDIRECT_URI=%s"   % self.redirect_uri   
+        if options.verbose and self.client_id:
+            print "HUBIC_CLIENT_ID=%s" % self.client_id      
 
-        if options.hubic_username:
-            self.username = options.hubic_username
-        else:
-            self.username = os.environ.get('HUBIC_USERNAME', 'None')
-        if options.verbose and self.username != 'None':
-            print "HUBIC_USERNAME=%s"       % self.username       
+        # Load hubic client_secret
+        try:
+            self.client_secret = config.get('hubic', 'client_secret')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.hubic_client_secret:
+                self.client_secret = options.hubic_client_secret
+            else:
+                self.client_secret = os.environ.get('HUBIC_CLIENT_SECRET', None)
 
-        if options.hubic_password:
-            self.password = options.hubic_password
-        else:
-            self.password = os.environ.get('HUBIC_PASSWORD', 'None')
-        if options.verbose and self.password != 'None':
-            print "HUBIC_PASSWORD=%s"       % self.password       
+        if options.verbose and self.client_secret:
+            print "HUBIC_CLIENT_SECRET=%s" % self.client_secret  
+
+        # Load hubic redirect_uri
+        try:
+            self.redirect_uri = config.get('hubic', 'redirect_uri')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.hubic_redirect_uri:
+                self.redirect_uri = options.hubic_redirect_uri
+            else:
+                self.redirect_uri = os.environ.get('HUBIC_REDIRECT_URI', None)
+
+        if options.verbose and self.redirect_uri:
+            print "HUBIC_REDIRECT_URI=%s" % self.redirect_uri   
+
+        # Load hubic username
+        try:
+            self.username = config.get('hubic', 'username')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.hubic_username:
+                self.username = options.hubic_username
+            else:
+                self.username = os.environ.get('HUBIC_USERNAME', None)
+        if options.verbose and self.username:
+            print "HUBIC_USERNAME=%s" % self.username       
+
+        # Load hubic password
+        try:
+            self.password = config.get('hubic', 'password')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.hubic_password:
+                self.password = options.hubic_password
+            else:
+                self.password = os.environ.get('HUBIC_PASSWORD', None)
+        if options.verbose and self.password:
+            print "HUBIC_PASSWORD=%s" % self.password       
 
 
-        if options.hubic_refresh_token:
-            self.refresh_token = options.hubic_refresh_token
-        else:
-            self.refresh_token = os.environ.get('HUBIC_REFRESH_TOKEN', 'None')
-        if options.verbose and self.refresh_token != 'None':
-            print "HUBIC_REFRESH_TOKEN=%s"  % self.refresh_token  
+        try:
+            self.refresh_token = config.get('hubic', 'refresh_token')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.hubic_refresh_token:
+                self.refresh_token = options.hubic_refresh_token
+            else:
+                self.refresh_token = os.environ.get('HUBIC_REFRESH_TOKEN', None)
+        if options.verbose and self.refresh_token:
+            print "HUBIC_REFRESH_TOKEN=%s" % self.refresh_token  
 
-        if options.hubic_access_token:
-            self.access_token = options.hubic_access_token
-        else:
-            self.access_token  = os.environ.get('HUBIC_ACCESS_TOKEN', 'None')
-        if options.verbose and self.access_token != 'None':
-            print "HUBIC_ACCESS_TOKEN=%s"   % self.access_token   
+        try:
+            self.access_token = config.get('hubic', 'access_token')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.hubic_access_token:
+                self.access_token = options.hubic_access_token
+            else:
+                self.access_token  = os.environ.get('HUBIC_ACCESS_TOKEN', None)
+        if options.verbose and self.access_token:
+            print "HUBIC_ACCESS_TOKEN=%s" % self.access_token   
 
-        if options.os_storage_url:
-            self.os_storage_url = options.os_storage_url
-        else:
-            self.os_storage_url = os.environ.get('OS_STORAGE_URL', 'None')
-        if options.verbose and self.os_storage_url != 'None':
-            print "OS_STORAGE_URL=%s"       % self.os_storage_url 
+        try:
+            self.os_storage_url = config.get('openstack', 'os_storage_url')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.os_storage_url:
+                self.os_storage_url = options.os_storage_url
+            else:
+                self.os_storage_url = os.environ.get('OS_STORAGE_URL', None)
+        if options.verbose and self.os_storage_url:
+            print "OS_STORAGE_URL=%s" % self.os_storage_url 
 
-        if options.os_auth_token:
-            self.os_auth_token = options.os_auth_token
-        else:
-            self.os_auth_token  = os.environ.get('OS_AUTH_TOKEN', 'None')
-        if options.verbose and self.os_auth_token != 'None':
-            print "OS_AUTH_TOKEN=%s"       % self.os_auth_token  
+        try:
+            self.os_auth_token = config.get('openstack', 'os_auth_token')
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if options.os_auth_token:
+                self.os_auth_token = options.os_auth_token
+            else:
+                self.os_auth_token  = os.environ.get('OS_AUTH_TOKEN', None)
+        if options.verbose and self.os_auth_token:
+            print "OS_AUTH_TOKEN=%s" % self.os_auth_token  
 
         self.token_url = 'https://api.hubic.com/oauth/token'
         self.auth_url  = 'https://api.hubic.com/oauth/auth'
-        self.oauth_code = 'None'
-        self.token_expire = 'None'
+        self.oauth_code = None
+        self.token_expire = None
+
+    def __del__(self):
+        if self.config:
+            if options.verbose:
+                print "-- Write config file back : %s " % self.config
+            config = ConfigParser.RawConfigParser()
+
+            config.add_section('hubic')
+            if self.client_id:
+                config.set('hubic', 'client_id', self.client_id)
+            if self.client_secret:
+                config.set('hubic', 'client_secret', self.client_secret)
+            if self.redirect_uri:
+                config.set('hubic', 'redirect_uri', self.redirect_uri)
+            if self.username:
+                config.set('hubic', 'username', self.username)
+            if self.password:
+                config.set('hubic', 'password', self.password)
+            if self.refresh_token:
+                config.set('hubic', 'refresh_token', self.refresh_token)
+            if self.access_token:
+                config.set('hubic', 'access_token', self.access_token)
+
+            config.add_section('openstack')
+            if self.os_auth_token:
+                config.set('openstack', 'os_auth_token', self.os_auth_token)
+            if self.os_storage_url:
+                config.set('openstack', 'os_storage_url', self.os_storage_url)
+
+            with open(self.config, 'wb') as configfile:
+                config.write(configfile)
+            os.chmod(self.config, 0600)
 
     def auth(self):
 
         # Do we have access token or an oauthid yet ?
-        if self.access_token == 'None' and self.oauth_code == 'None':
+        if not self.access_token and not self.oauth_code:
 
             # Request client app creds
-            if self.client_id == 'None':
+            if not self.client_id:
                 self.client_id = raw_input('HUBIC_CLIENT_ID=')
-            if self.redirect_uri == 'None':
+            if not self.client_secret:
+                self.client_secret = raw_input('HUBIC_CLIENT_SECRET=')
+            if not self.redirect_uri:
                 self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
 
             # Request Hubic account creds
-            if self.username == 'None':
+            if not self.username:
                 self.username = raw_input('Username: ')
-            if self.password == 'None':
+            if not self.password:
                 self.password = getpass()
 
             # Authorization request
@@ -186,18 +269,18 @@ class hubic:
 
     def token(self):
 
-        if self.access_token == 'None':
+        if not self.access_token:
 
-            if self.oauth_code == 'None':
+            if not self.oauth_code:
                 print "Cannot request token without oauth code"
                 return
 
-            if self.client_id == 'None' or self.client_secret == 'None':
-                if self.client_id == 'None':
+            if not self.client_id or not self.client_secret:
+                if not self.client_id:
                     self.client_id = raw_input('HUBIC_CLIENT_ID=')
-                if self.client_secret == 'None':
+                if not self.client_secret:
                     self.client_secret = raw_input('HUBIC_CLIENT_SECRET=')
-                if self.redirect_uri == 'None':
+                if not self.redirect_uri:
                     self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
 
 
@@ -234,16 +317,16 @@ class hubic:
 
         self.token_url = 'https://api.hubic.com/oauth/token'
 
-        if self.refresh_token == 'None':
+        if not self.refresh_token:
             print "Cannot request new acces token without refresh token"
             return
 
-        if self.client_id == 'None' or self.client_secret == 'None':
-            if self.client_id == 'None':
+        if not self.client_id or not self.client_secret:
+            if not self.client_id:
                 self.client_id = raw_input('HUBIC_CLIENT_ID=')
-            if self.client_secret == 'None':
+            if not self.client_secret:
                 self.client_secret = raw_input('HUBIC_CLIENT_SECRET=')
-            if self.redirect_uri == 'None':
+            if not self.redirect_uri:
                 self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
 
         payload = {'refresh_token' : self.refresh_token,
@@ -277,7 +360,7 @@ class hubic:
 
         hubic_api_url = 'https://api.hubic.com/1.0%s' % hubic_api
 
-        if self.access_token != 'None':
+        if self.access_token:
 
             if options.verbose:
                 print "-- GET request to hubic API : %s" % hubic_api
@@ -310,7 +393,7 @@ class hubic:
 
         hubic_api_url = 'https://api.hubic.com/1.0%s' % hubic_api
 
-        if self.access_token != 'None':
+        if self.access_token:
 
             if options.verbose:
                 print "-- POST request to hubic API : %s" % hubic_api
@@ -347,7 +430,7 @@ class hubic:
 
         hubic_api_url = 'https://api.hubic.com/1.0%s' % hubic_api
 
-        if self.access_token != 'None':
+        if self.access_token:
 
             if options.verbose:
                 print "-- DELETE request to hubic API : %s" % hubic_api
@@ -381,9 +464,9 @@ class hubic:
 
         self.cred_url = 'https://api.hubic.com/1.0/account/credentials'
 
-        if self.access_token != 'None':
+        if self.access_token:
 
-            if self.os_storage_url == 'None' or self.os_auth_token == 'None':
+            if not self.os_storage_url or not self.os_auth_token:
 
                 if options.verbose:
                     print "-- Request OpenStack token and storage url:"
@@ -421,6 +504,10 @@ parser.add_option("-v",
                   action="store_true", dest="verbose", default=False,
                   help="Display verbose messages")
 
+parser.add_option("--config",
+                  action="store", type="string", dest="config",
+                  help="specify hubic config file to load")
+
 parser.add_option("--token",
                   action="store_true", dest="token", default=False,
                   help="Request Hubic token")
@@ -439,7 +526,7 @@ parser.add_option("--post",
 
 parser.add_option("--data",
                   action="store", type="string", dest="data",
-                  help="urel encoded date for POST request")
+                  help="url encoded date for POST request")
 
 parser.add_option("--delete",
                   action="store", type="string", dest="delete",
