@@ -387,7 +387,8 @@ class hubic:
                 print "Something wrong has happened when accesing hubic API (GET request)"
                 sys.exit(10)
  
-            print r.text
+            for keys in r.json():
+                print "%s : %s" % (keys,r.json()[keys])
 
     def post(self, hubic_api, data):
 
@@ -424,7 +425,8 @@ class hubic:
                 print "Something wrong has happened when accesing hubic API (POST request)"
                 sys.exit(10)
  
-            print r.text
+            for keys in r.json():
+                print "%s : %s" % (keys,r.json()[keys])
 
     def delete(self, hubic_api):
 
@@ -458,7 +460,8 @@ class hubic:
                 print "Something wrong has happened when accesing hubic API (DELETE request)"
                 sys.exit(10)
  
-            print r.text
+            for keys in r.json():
+                print "%s : %s" % (keys,r.json()[keys])
 
     def swift(self, args):
 
