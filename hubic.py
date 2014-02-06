@@ -29,6 +29,7 @@ from optparse import OptionParser, OptionGroup
 from requests.auth import HTTPBasicAuth
 from getpass import getpass
 from stat import S_IRUSR, S_IWUSR
+from time import time, strptime, mktime, strftime, localtime
 
 class HTTPBearerAuth(requests.auth.AuthBase):
     def __init__(self, token):
@@ -128,6 +129,13 @@ class hubic:
             print "HUBIC_REFRESH_TOKEN=%s" % self.refresh_token  
 
         try:
+            self.token_expire = float(config.get('hubic', 'token_expire'))
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            self.token_expire = None
+        if options.verbose and self.token_expire:
+            print "HUBIC_TOKEN_EXPIRE=%s (%s)" % (self.token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire)))
+
+        try:
             self.access_token = config.get('hubic', 'access_token')
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             if options.hubic_access_token:
@@ -157,10 +165,16 @@ class hubic:
         if options.verbose and self.os_auth_token:
             print "OS_AUTH_TOKEN=%s" % self.os_auth_token  
 
+        try:
+            self.os_token_expire = float(config.get('openstack', 'os_token_expire'))
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            self.os_token_expire  = None
+        if options.verbose and self.os_token_expire:
+            print "OS_TOKEN_EXPIRE=%s (%s)" % (self.os_token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire)))
+
         self.token_url = 'https://api.hubic.com/oauth/token'
         self.auth_url  = 'https://api.hubic.com/oauth/auth'
         self.oauth_code = None
-        self.token_expire = None
 
     def __del__(self):
         if self.config:
@@ -183,12 +197,16 @@ class hubic:
                 config.set('hubic', 'refresh_token', self.refresh_token)
             if self.access_token:
                 config.set('hubic', 'access_token', self.access_token)
+            if self.token_expire:
+                config.set('hubic', 'token_expire', self.token_expire)
 
             config.add_section('openstack')
             if self.os_auth_token:
                 config.set('openstack', 'os_auth_token', self.os_auth_token)
             if self.os_storage_url:
                 config.set('openstack', 'os_storage_url', self.os_storage_url)
+            if self.os_token_expire:
+                config.set('openstack', 'os_token_expire', self.os_token_expire)
 
             with open(self.config, 'wb') as configfile:
                 config.write(configfile)
@@ -302,7 +320,7 @@ class hubic:
             try:
                 self.refresh_token = r.json()['refresh_token']
                 self.access_token  = r.json()['access_token']
-                self.token_expire  = r.json()['expires_in']
+                self.token_expire  = time() + r.json()['expires_in']
                 self.token_type    = r.json()['token_type']
 
             except:
@@ -311,6 +329,7 @@ class hubic:
  
             print "HUBIC_ACCESS_TOKEN=%s" % self.access_token
             print "HUBIC_REFRESH_TOKEN=%s" % self.refresh_token
+            print "HUBIC_TOKEN_EXPIRE=%s (%s)" % (self.token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire)))
         return self.access_token
 
     def refresh(self):
@@ -345,7 +364,7 @@ class hubic:
 
         try:
             self.access_token  = r.json()['access_token']
-            self.token_expire  = r.json()['expires_in']
+            self.token_expire  = time() + r.json()['expires_in']
             self.token_type    = r.json()['token_type']
 
         except:
@@ -353,7 +372,7 @@ class hubic:
             sys.exit(10)
  
         print "HUBIC_ACCESS_TOKEN=%s" % self.access_token
-        print "HUBIC_TOKEN_EXPIRE=%s" % self.token_expire
+        print "HUBIC_TOKEN_EXPIRE=%s (%s)" % (self.token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire)))
         return self.access_token
 
     def get(self, hubic_api):
@@ -364,6 +383,10 @@ class hubic:
 
             if options.verbose:
                 print "-- GET request to hubic API : %s" % hubic_api
+
+            if self.token_expire <= time():
+                print "Access token has expired, try to renew it"
+                self.refresh()
 
             bearer_auth = HTTPBearerAuth(self.access_token)
             r = requests.get(hubic_api_url, auth=bearer_auth)
@@ -398,7 +421,10 @@ class hubic:
 
             if options.verbose:
                 print "-- POST request to hubic API : %s" % hubic_api
-                print data
+
+            if self.token_expire <= time():
+                print "Access token has expired, try to renew it"
+                self.refresh()
 
             headers = {'content-type': 'application/x-www-form-urlencoded'}
 
@@ -437,6 +463,10 @@ class hubic:
             if options.verbose:
                 print "-- DELETE request to hubic API : %s" % hubic_api
 
+            if self.token_expire <= time():
+                print "Access token has expired, try to renew it"
+                self.refresh()
+
             bearer_auth = HTTPBearerAuth(self.access_token)
             r = requests.delete(hubic_api_url, auth=bearer_auth)
 
@@ -469,7 +499,7 @@ class hubic:
 
         if self.access_token:
 
-            if not self.os_storage_url or not self.os_auth_token:
+            if not self.os_storage_url or not self.os_auth_token or self.os_token_expire <= time():
 
                 if options.verbose:
                     print "-- Request OpenStack token and storage url:"
@@ -485,6 +515,7 @@ class hubic:
                 try:
                     self.os_auth_token  = r.json()['token']
                     self.os_storage_url = r.json()['endpoint']
+                    self.os_token_expire = mktime(strptime(r.json()['expires'], '%Y-%m-%dT%H:%M:%S+01:00'))-3600
  
                 except:
                     print "Something wrong has happened when requesting hubic storage credentials"
@@ -492,6 +523,7 @@ class hubic:
 
                 print "OS_STORAGE_URL=%s" % self.os_storage_url 
                 print "OS_AUTH_TOKEN=%s" % self.os_auth_token  
+                print "OS_TOKEN_EXPIRE=%s (%s)" % (self.os_token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire)))
 
             if options.verbose:
                 print "-- Run swift client:"
