@@ -323,7 +323,7 @@ class hubic:
                     return
 
             except:
-                print "Something wrong has happened when accesing hubic API (GET request)"
+                print "Something wrong has happened when accessing hubic API (GET request)"
                 sys.exit(10)
 
             for keys in r.json():
@@ -364,7 +364,7 @@ class hubic:
                     return
 
             except:
-                print "Something wrong has happened when accesing hubic API (POST request)"
+                print "Something wrong has happened when accessing hubic API (POST request)"
                 sys.exit(10)
 
             for keys in r.json():
@@ -403,7 +403,7 @@ class hubic:
                     return
 
             except:
-                print "Something wrong has happened when accesing hubic API (DELETE request)"
+                print "Something wrong has happened when accessing hubic API (DELETE request)"
                 sys.exit(10)
 
             for keys in r.json():
