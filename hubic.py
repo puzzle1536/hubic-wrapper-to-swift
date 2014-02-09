@@ -48,7 +48,7 @@ class hubic:
             if option:
                 value = option
             else:
-                value = os.environ.get(env, None)
+                value = os.environ.get(env, 0)
         if options.verbose and value:
             print "%s=%s" % (env, value)
         return value
