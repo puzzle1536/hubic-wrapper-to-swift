@@ -30,7 +30,7 @@ Use
 ### Get complete function list
     $ ./hubic.py --help
 
-### Request an access new token
+### Request a new access token
     $ ./hubic.py --token
 
 hubic.py will load and store for hubic credentials in the default config file
