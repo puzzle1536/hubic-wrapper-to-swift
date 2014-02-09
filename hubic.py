@@ -22,6 +22,7 @@ import subprocess
 import sys
 import os
 import ConfigParser
+import re
 
 from urlparse import parse_qsl, urlparse
 from urllib import urlencode
@@ -164,7 +165,7 @@ class hubic:
                 sys.exit(1)
 
             try:
-                oauthid = libxml2.parseDoc(r.text).xpathEval('/page/opt/OAuthId')[0].content
+                oauthid = re.search('(?<=<input type="hidden" name="oauth" value=")[0-9]*', r.text).group(0)
             except:
                 print "Failed to request authorization code, please verify client_id or redirect_uri"
                 sys.exit(1)
