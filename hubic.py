@@ -83,8 +83,8 @@ class hubic:
         self.access_token  = self.load_config('hubic', 'access_token',  options.hubic_access_token,  'HUBIC_ACCESS_TOKEN')
         self.refresh_token = self.load_config('hubic', 'refresh_token', options.hubic_refresh_token, 'HUBIC_REFRESH_TOKEN')
 
-        self.os_auth_token   = self.load_config('openstack', 'os_auth_token',  options.os_auth_token,  'OS_REFRESH_TOKEN')
-        self.os_storage_url  = self.load_config('openstack', 'os_storage_url', options.os_storage_url, 'OS_ACCESS_TOKEN')
+        self.os_auth_token   = self.load_config('openstack', 'os_auth_token',  options.os_auth_token,  'OS_AUTH_TOKEN')
+        self.os_storage_url  = self.load_config('openstack', 'os_storage_url', options.os_storage_url, 'OS_STORAGE_URL')
 
         self.token_expire    = float(self.load_config('hubic',     'token_expire',     None, 'HUBIC_TOKEN_EXPIRE'))
         self.os_token_expire = float(self.load_config('openstack', 'os_token_expire',  None, 'OS_TOKEN_EXPIRE'))
