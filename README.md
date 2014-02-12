@@ -10,11 +10,11 @@ Requirements
 ------------
 
 This is program is written in python and has only been tested on debian
-wheezy. It relies on a few python libraries (requests, libxml2, ...). Please
+wheezy. It relies on a few python libraries (requests, ...). Please
 check hubic.py header for the complete list.
 
 The following packages should be enough to make it work on debian :  
-swift, python, python-libxml2, python-requests
+swift, python, python-requests
 
 You must register an application in your hubic account to access the hubic API  
 https://hubic.com/home/browser/developers/
