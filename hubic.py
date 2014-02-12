@@ -17,7 +17,6 @@
 
 import requests
 import json
-import libxml2
 import subprocess
 import sys
 import os
