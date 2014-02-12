@@ -418,7 +418,7 @@ class hubic:
 
         if self.access_token:
 
-            if not self.os_storage_url or not self.os_auth_token or self.os_token_expire <= time():
+            if not self.os_storage_url or not self.os_auth_token or self.os_token_expire <= time() or options.os_refresh:
 
                 if options.verbose:
                     print "-- Request OpenStack token and storage url:"
@@ -434,7 +434,7 @@ class hubic:
                 try:
                     self.os_auth_token  = r.json()['token']
                     self.os_storage_url = r.json()['endpoint']
-                    self.os_token_expire = mktime(strptime(r.json()['expires'], '%Y-%m-%dT%H:%M:%S+01:00'))-3600
+                    self.os_token_expire = mktime(strptime(r.json()['expires'], '%Y-%m-%dT%H:%M:%S+01:00'))
 
                 except:
                     print "Something wrong has happened when requesting hubic storage credentials"
@@ -469,6 +469,10 @@ parser.add_option("--token",
 parser.add_option("--refresh",
                   action="store_true", dest="refresh", default=False,
                   help="Refresh Hubic token")
+
+parser.add_option("--os-refresh",
+                  action="store_true", dest="os_refresh", default=False,
+                  help="Refresh OpenStack token")
 
 parser.add_option("--get",
                   action="store", type="string", dest="get",
