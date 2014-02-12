@@ -257,7 +257,7 @@ class hubic:
 
         if not self.refresh_token:
             print "Cannot request new acces token without refresh token"
-            return
+            sys.exit(4)
 
         if not self.client_id or not self.client_secret:
             if not self.client_id:
@@ -419,6 +419,11 @@ class hubic:
         if self.access_token:
 
             if not self.os_storage_url or not self.os_auth_token or self.os_token_expire <= time() or options.os_refresh:
+
+                # check access_token expired
+                if self.token_expire <= time():
+                    print "-- Access token has expired, try to renew it"
+                    self.refresh()
 
                 if options.verbose:
                     print "-- Request OpenStack token and storage url:"
