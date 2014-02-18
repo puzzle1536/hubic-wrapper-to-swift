@@ -86,10 +86,10 @@ class hubic:
         self.os_storage_url  = self.load_config('openstack', 'os_storage_url', options.os_storage_url, 'OS_STORAGE_URL')
 
         self.token_expire    = float(self.load_config('hubic',     'token_expire',     None, 'HUBIC_TOKEN_EXPIRE'))
-        if options.verbose:
+        if options.verbose and self.token_expire:
             print "  `-- expires on %s" % strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire))
         self.os_token_expire = float(self.load_config('openstack', 'os_token_expire',  None, 'OS_TOKEN_EXPIRE'))
-        if options.verbose:
+        if options.verbose and self.os_token_expire:
             print "  `-- expires on %s" % strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire))
 
         self.token_url = 'https://api.hubic.com/oauth/token'
