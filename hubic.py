@@ -93,7 +93,6 @@ class hubic:
             print "  `-- expires on %s" % strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire))
 
         self.token_url = 'https://api.hubic.com/oauth/token'
-        self.auth_url  = 'https://api.hubic.com/oauth/auth'
         self.oauth_code = None
 
     def __del__(self):
@@ -132,86 +131,9 @@ class hubic:
                 self.hubic_config.write(configfile)
             os.chmod(self.config_file, 0600)
 
-    def auth(self):
-
-        # Do we have access token or an oauthid yet ?
-        if not self.access_token and not self.oauth_code:
-
-            # Request client app creds
-            if not self.client_id:
-                self.client_id = raw_input('HUBIC_CLIENT_ID=')
-            if not self.client_secret:
-                self.client_secret = raw_input('HUBIC_CLIENT_SECRET=')
-            if not self.redirect_uri:
-                self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
-
-            # Request Hubic account creds
-            if not self.username:
-                self.username = raw_input('Username: ')
-            if not self.password:
-                self.password = getpass()
-
-            # Authorization request
-            payload = {'client_id' : self.client_id,
-                       'redirect_uri' : self.redirect_uri,
-                       'scope' : 'usage.r,account.r,getAllLinks.r,credentials.r,activate.w,links.drw',
-                       'response_type' : 'code',
-                       'state' : 'none'}
-
-            if options.verbose:
-                print "-- Request hubic oauth ID:"
-
-            r = requests.get(self.auth_url, params=payload, allow_redirects=False)
-
-            if r.status_code != 200:
-                print "Failed to request authorization code, please verify client_id or redirect_uri"
-                sys.exit(1)
-
-            try:
-                oauthid = re.search('(?<=<input type="hidden" name="oauth" value=")[0-9]*', r.text).group(0)
-            except:
-                print "Failed to request authorization code, please verify client_id or redirect_uri"
-                sys.exit(1)
-
-
-            # Get request code
-            payload = {'oauth' : oauthid,
-                       'usage': 'r',
-                       'account': 'r',
-                       'getAllLinks': 'r',
-                       'credentials': 'r',
-                       'activate': 'w',
-                       'links': 'r',
-                       'action': 'accepted',
-                       'login': self.username,
-                       'user_pwd': self.password}
-
-            # Add missing links d & w rights
-            data = "%s&links=w&links=d" % urlencode(payload)
-
-            headers = {'content-type': 'application/x-www-form-urlencoded'}
-
-            if options.verbose:
-                print "-- Request authorization code:"
-
-            r = requests.post(self.auth_url, data=data, headers=headers, allow_redirects=False)
-
-            try:
-                location = urlparse(r.headers['location'])
-                self.oauth_code = dict(parse_qsl(location.query))['code']
-            except:
-                print "Failed to request authorization code, please verify hubic username and password"
-                sys.exit(2)
-
-            return self.oauth_code
-
     def token(self):
 
         if not self.access_token:
-
-            if not self.oauth_code:
-                print "Cannot request token without oauth code"
-                return
 
             if not self.client_id or not self.client_secret:
                 if not self.client_id:
@@ -221,15 +143,23 @@ class hubic:
                 if not self.redirect_uri:
                     self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
 
+            # Request Hubic account creds
+            if not self.username:
+                self.username = raw_input('Username: ')
+            if not self.password:
+                self.password = getpass()
 
-            payload = {'code' : self.oauth_code,
-                       'redirect_uri': self.redirect_uri,
-                       'grant_type' : 'authorization_code'}
+            payload = {'grant_type': 'password',
+                       'username': self.username,
+                       'password': self.password,
+                       'scope': 'usage.r,account.r,getAllLinks.r,credentials.r,activate.w,links.drw'}
+
+            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
             if options.verbose:
                 print "-- Request access token:"
 
-            r = requests.post(self.token_url, payload,
+            r = requests.post(self.token_url, data=urlencode(payload), headers=headers,
                               auth=HTTPBasicAuth(self.client_id,self.client_secret),
                               allow_redirects=False)
 
@@ -550,21 +480,17 @@ hubic = hubic()
 
 # Handle requests to Hubic API
 if options.token:
-    hubic.auth()
     hubic.token()
 
 if options.get:
-    hubic.auth()
     hubic.token()
     hubic.get(options.get)
 
 if options.post:
-    hubic.auth()
     hubic.token()
     hubic.post(options.post, options.data)
 
 if options.delete:
-    hubic.auth()
     hubic.token()
     hubic.delete(options.delete)
 
@@ -572,7 +498,6 @@ if options.refresh:
     hubic.refresh()
 
 if options.swift:
-    hubic.auth()
     hubic.token()
     hubic.swift(args)
 
