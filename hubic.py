@@ -456,123 +456,123 @@ class hubic:
             cmd = ['swift', "--os-auth-token", self.os_auth_token, '--os-storage-url', self.os_storage_url]
             cmd.extend(args)
             subprocess.call(cmd)
-
-usage = "usage: %prog [options] -- [swift args]"
-parser = OptionParser(usage=usage)
-
-parser.add_option("-v",
-                  action="store_true", dest="verbose", default=False,
-                  help="Display verbose messages")
-
-parser.add_option("--config",
-                  action="store", type="string", dest="config",
-                  help="specify hubic config file to load")
-
-parser.add_option("--token",
-                  action="store_true", dest="token", default=False,
-                  help="Request Hubic token")
-
-parser.add_option("--refresh",
-                  action="store_true", dest="refresh", default=False,
-                  help="Refresh Hubic token")
-
-parser.add_option("--os-refresh",
-                  action="store_true", dest="os_refresh", default=False,
-                  help="Refresh OpenStack token")
-
-parser.add_option("--get",
-                  action="store", type="string", dest="get",
-                  help="Perform GET request to Hubic API")
-
-parser.add_option("--post",
-                  action="store", type="string", dest="post",
-                  help="Perform POST request to Hubic API")
-
-parser.add_option("--data",
-                  action="store", type="string", dest="data",
-                  help="url encoded date for POST request")
-
-parser.add_option("--delete",
-                  action="store", type="string", dest="delete",
-                  help="Perform DELETE request to Hubic API")
-
-parser.add_option("--swift",
-                  action="store_true", dest="swift", default=False,
-                  help="Call swift with all the remaining args following \"--\"")
-
-group = OptionGroup(parser, "Hubic access parameters")
-
-group.add_option("--hubic-username",
-                  action="store", type="string", dest="hubic_username",
-                  help="Hubic username")
-
-group.add_option("--hubic-password",
-                  action="store", type="string", dest="hubic_password",
-                  help="Hubic password")
-
-group.add_option("--hubic-client-id",
-                  action="store", type="string", dest="hubic_client_id",
-                  help="Hubic Client ID")
-
-group.add_option("--hubic-client-secret",
-                  action="store", type="string", dest="hubic_client_secret",
-                  help="Hubic Client Secret")
-
-group.add_option("--hubic-redirect-uri",
-                  action="store", type="string", dest="hubic_redirect_uri",
-                  help="Hubic Client Redirect URI")
-
-group.add_option("--hubic-access-token",
-                  action="store", type="string", dest="hubic_access_token",
-                  help="Hubic Client Redirect URI")
-
-group.add_option("--hubic-refresh-token",
-                  action="store", type="string", dest="hubic_refresh_token",
-                  help="Hubic Client Redirect URI")
-
-parser.add_option_group(group)
-
-group = OptionGroup(parser, "OpenStack Options")
-
-group.add_option("--os-auth-token",
-                  action="store", type="string", dest="os_auth_token",
-                  help="Hubic/OpenStack access token")
-
-group.add_option("--os-storage-url",
-                  action="store", type="string", dest="os_storage_url",
-                  help="Hubic/OpenStack storage URL")
-
-parser.add_option_group(group)
-
-(options, args) = parser.parse_args()
-
-hubic = hubic()
-
-# Handle requests to Hubic API
-if options.token:
-    hubic.auth()
-    hubic.token()
-
-if options.get:
-    hubic.auth()
-    hubic.token()
-    hubic.get(options.get)
-
-if options.post:
-    hubic.auth()
-    hubic.token()
-    hubic.post(options.post, options.data)
-
-if options.delete:
-    hubic.auth()
-    hubic.token()
-    hubic.delete(options.delete)
-
-if options.refresh:
-    hubic.refresh()
-
-if options.swift:
-    hubic.auth()
-    hubic.token()
-    hubic.swift(args)
+if __name__ == '__main__':
+    usage = "usage: %prog [options] -- [swift args]"
+    parser = OptionParser(usage=usage)
+    
+    parser.add_option("-v",
+                      action="store_true", dest="verbose", default=False,
+                      help="Display verbose messages")
+    
+    parser.add_option("--config",
+                      action="store", type="string", dest="config",
+                      help="specify hubic config file to load")
+    
+    parser.add_option("--token",
+                      action="store_true", dest="token", default=False,
+                      help="Request Hubic token")
+    
+    parser.add_option("--refresh",
+                      action="store_true", dest="refresh", default=False,
+                      help="Refresh Hubic token")
+    
+    parser.add_option("--os-refresh",
+                      action="store_true", dest="os_refresh", default=False,
+                      help="Refresh OpenStack token")
+    
+    parser.add_option("--get",
+                      action="store", type="string", dest="get",
+                      help="Perform GET request to Hubic API")
+    
+    parser.add_option("--post",
+                      action="store", type="string", dest="post",
+                      help="Perform POST request to Hubic API")
+    
+    parser.add_option("--data",
+                      action="store", type="string", dest="data",
+                      help="url encoded date for POST request")
+    
+    parser.add_option("--delete",
+                      action="store", type="string", dest="delete",
+                      help="Perform DELETE request to Hubic API")
+    
+    parser.add_option("--swift",
+                      action="store_true", dest="swift", default=False,
+                      help="Call swift with all the remaining args following \"--\"")
+    
+    group = OptionGroup(parser, "Hubic access parameters")
+    
+    group.add_option("--hubic-username",
+                      action="store", type="string", dest="hubic_username",
+                      help="Hubic username")
+    
+    group.add_option("--hubic-password",
+                      action="store", type="string", dest="hubic_password",
+                      help="Hubic password")
+    
+    group.add_option("--hubic-client-id",
+                      action="store", type="string", dest="hubic_client_id",
+                      help="Hubic Client ID")
+    
+    group.add_option("--hubic-client-secret",
+                      action="store", type="string", dest="hubic_client_secret",
+                      help="Hubic Client Secret")
+    
+    group.add_option("--hubic-redirect-uri",
+                      action="store", type="string", dest="hubic_redirect_uri",
+                      help="Hubic Client Redirect URI")
+    
+    group.add_option("--hubic-access-token",
+                      action="store", type="string", dest="hubic_access_token",
+                      help="Hubic Client Redirect URI")
+    
+    group.add_option("--hubic-refresh-token",
+                      action="store", type="string", dest="hubic_refresh_token",
+                      help="Hubic Client Redirect URI")
+    
+    parser.add_option_group(group)
+    
+    group = OptionGroup(parser, "OpenStack Options")
+    
+    group.add_option("--os-auth-token",
+                      action="store", type="string", dest="os_auth_token",
+                      help="Hubic/OpenStack access token")
+    
+    group.add_option("--os-storage-url",
+                      action="store", type="string", dest="os_storage_url",
+                      help="Hubic/OpenStack storage URL")
+    
+    parser.add_option_group(group)
+    
+    (options, args) = parser.parse_args()
+    
+    hubic = hubic()
+    
+    # Handle requests to Hubic API
+    if options.token:
+        hubic.auth()
+        hubic.token()
+    
+    if options.get:
+        hubic.auth()
+        hubic.token()
+        hubic.get(options.get)
+    
+    if options.post:
+        hubic.auth()
+        hubic.token()
+        hubic.post(options.post, options.data)
+    
+    if options.delete:
+        hubic.auth()
+        hubic.token()
+        hubic.delete(options.delete)
+    
+    if options.refresh:
+        hubic.refresh()
+    
+    if options.swift:
+        hubic.auth()
+        hubic.token()
+        hubic.swift(args)
 
