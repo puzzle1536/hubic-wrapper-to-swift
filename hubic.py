@@ -29,7 +29,7 @@ from optparse import OptionParser, OptionGroup
 from requests.auth import HTTPBasicAuth
 from getpass import getpass
 from stat import S_IRUSR, S_IWUSR
-from time import time, strptime, mktime, strftime, localtime
+from time import time, strptime, mktime, strftime, localtime, timezone
 
 class HTTPBearerAuth(requests.auth.AuthBase):
     def __init__(self, token):
@@ -440,7 +440,11 @@ class hubic:
                 try:
                     self.os_auth_token  = r.json()['token']
                     self.os_storage_url = r.json()['endpoint']
-                    self.os_token_expire = mktime(strptime(r.json()['expires'], '%Y-%m-%dT%H:%M:%S+01:00'))
+                    # Extract 'CEST time' from 'expires' return value
+                    self.os_token_expire = mktime(strptime((r.json()['expires'])[:-6],
+                                                  '%Y-%m-%dT%H:%M:%S'))
+                    # Correct with local timezone
+                    self.os_token_expire -= (timezone + 3600)
 
                 except:
                     print "Something wrong has happened when requesting hubic storage credentials"
@@ -456,6 +460,7 @@ class hubic:
             cmd = ['swift', "--os-auth-token", self.os_auth_token, '--os-storage-url', self.os_storage_url]
             cmd.extend(args)
             subprocess.call(cmd)
+
 if __name__ == '__main__':
     usage = "usage: %prog [options] -- [swift args]"
     parser = OptionParser(usage=usage)
