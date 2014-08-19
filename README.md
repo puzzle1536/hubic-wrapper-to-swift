@@ -105,8 +105,7 @@ the program will request them using "/account/credentials" API
 Contact
 -------
 
-Please report any bug or enhancement requests to the [github project page]  
-https://github.com/puzzle1536/hubic-api/issues?state=open
+Please report any bug or enhancement requests to the [github project page](https://github.com/puzzle1536/hubic-wrapper-to-swift/issues?q=is%3Aopen+is%3Aissue)
 
 License
 -------
