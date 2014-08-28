@@ -13,7 +13,7 @@ This is program is written in python and has only been tested on debian
 wheezy. It relies on a few python libraries (requests, ...). Please
 check hubic.py header for the complete list.
 
-The following packages should be enough to make it work on debian
+The following packages should be enough to make it work on Debian
 `apt-get install swift python-requests` or using [pip](https://github.com/pypa/pip) `pip install requests python-swiftclient`
 
 You must [register an application](https://hubic.com/home/browser/developers/) in your hubiC account to access the hubiC API.
