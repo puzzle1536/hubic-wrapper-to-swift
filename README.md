@@ -16,6 +16,9 @@ check hubic.py header for the complete list.
 The following packages should be enough to make it work on debian :  
 swift, python, python-requests
 
+You may also install python required package through :
+    pip install -r requirements.txt
+
 You must register an application in your hubic account to access the hubic API  
 https://hubic.com/home/browser/developers/
 
@@ -83,8 +86,8 @@ followed by the hubic API name :
     $ ./hubic.py --get /account
     {"email":"mymail@gmail.com","firstname":"MyFirstName","activated":true,"creationDate":"2013-04-04T12:45:36+01:00","language":"en","status":"ok","offer":"25g","lastname":"MyLastName"}
 
-If you want to perform a POST request, you can add "url-encoded" data with
-"--data" switch :
+If you want to perform a POST request, you can add URL encoded data with the
+"--data" option (See https://docs.python.org/2/library/urllib.html#urllib.urlencode):
 
     $ ./hubic.py --post /account/links --data "comment=none&container=default&mode=ro&ttl=1&type=file&uri=%2Fmyshare.txt"
 
