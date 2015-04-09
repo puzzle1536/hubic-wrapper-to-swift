@@ -105,6 +105,10 @@ All parameters provided after "--" are forwarded to swift client.  If
 OS_AUTH_TOKEN and OS_STORAGE_URL are not already provided in the environment,
 the program will request them using "/account/credentials" API
 
+### Python 3 compatibility
+
+`hubic.py` script is not compatible with python 3.x, use `hybic.py-3` instead.
+
 Contact
 -------
 
