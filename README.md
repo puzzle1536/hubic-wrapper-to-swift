@@ -107,7 +107,8 @@ the program will request them using "/account/credentials" API
 
 ### Python 3 compatibility
 
-`hubic.py` script is not compatible with python 3.x, use `hybic.py-3` instead.
+`hubic.py` script is not compatible with python 3, use `hybic.py-3`instead or
+hybic.py-3.4 for python >= 3.4
 
 Contact
 -------
