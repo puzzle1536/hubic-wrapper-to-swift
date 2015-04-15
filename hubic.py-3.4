@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/python3 -u
 #
 # Copyright 2014-2015 - Puzzle <puzzle1536@gmail.com>
 #
@@ -20,11 +20,11 @@ import json
 import subprocess
 import sys
 import os
-import ConfigParser
+import configparser
 import re
 
-from urlparse import parse_qsl, urlparse
-from urllib import urlencode
+from urllib.parse import parse_qsl, urlparse
+from urllib.parse import urlencode
 from optparse import OptionParser, OptionGroup
 from requests.auth import HTTPBasicAuth
 from getpass import getpass
@@ -44,19 +44,19 @@ class hubic:
     def load_config(self, section, name, option, env):
         try:
             value = self.hubic_config.get(section, name)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        except (configparser.NoSectionError, configparser.NoOptionError):
             if option:
                 value = option
             else:
                 value = os.environ.get(env, 0)
         if options.verbose and value:
-            print "%s=%s" % (env, value)
+            print("%s=%s" % (env, value))
         return value
 
     def __init__(self):
 
         if options.verbose:
-            print "-- Load environment hubic credentials:"
+            print("-- Load environment hubic credentials:")
 
         # Load existing hubic config
         if options.config and os.path.exists(options.config):
@@ -65,10 +65,10 @@ class hubic:
             self.config_file = os.path.expanduser('~/.hubic.cfg')
 
         try:
-            self.hubic_config = ConfigParser.ConfigParser()
+            self.hubic_config = configparser.ConfigParser()
             self.hubic_config.read(self.config_file)
-        except ConfigParser.ParsingError:
-            print "Cannot read config file %s" % self.config_file
+        except configparser.ParsingError:
+            print("Cannot read config file %s" % self.config_file)
             sys.exit(1)
 
         # Load hubic config
@@ -87,50 +87,52 @@ class hubic:
 
         self.token_expire    = float(self.load_config('hubic',     'token_expire',     None, 'HUBIC_TOKEN_EXPIRE'))
         if options.verbose and self.token_expire:
-            print "  `-- expires on %s" % strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire))
+            print("  `-- expires on %s" % strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire)))
         self.os_token_expire = float(self.load_config('openstack', 'os_token_expire',  None, 'OS_TOKEN_EXPIRE'))
         if options.verbose and self.os_token_expire:
-            print "  `-- expires on %s" % strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire))
+            print("  `-- expires on %s" % strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire)))
 
         self.token_url = 'https://api.hubic.com/oauth/token'
         self.auth_url  = 'https://api.hubic.com/oauth/auth'
         self.oauth_code = None
 
-    def __del__(self):
+    def write_config(self):
         if self.config_file:
             if options.verbose:
-                print "-- Write config file back : %s " % self.config_file
-            self.hubic_config = ConfigParser.RawConfigParser()
+                print("-- Write config file back : %s " % self.config_file)
+
+            self.hubic_config.remove_section('hubic')
+            self.hubic_config.remove_section('openstack')
 
             self.hubic_config.add_section('hubic')
             if self.client_id:
-                self.hubic_config.set('hubic', 'client_id', self.client_id)
+                self.hubic_config.set('hubic', "client_id", self.client_id)
             if self.client_secret:
-                self.hubic_config.set('hubic', 'client_secret', self.client_secret)
+                self.hubic_config.set('hubic', "client_secret", self.client_secret)
             if self.redirect_uri:
-                self.hubic_config.set('hubic', 'redirect_uri', self.redirect_uri)
+                self.hubic_config.set('hubic', "redirect_uri", self.redirect_uri)
             if self.username:
-                self.hubic_config.set('hubic', 'username', self.username)
+                self.hubic_config.set('hubic', "username", self.username)
             if self.password:
-                self.hubic_config.set('hubic', 'password', self.password)
+                self.hubic_config.set('hubic', "password", self.password)
             if self.refresh_token:
-                self.hubic_config.set('hubic', 'refresh_token', self.refresh_token)
+                self.hubic_config.set('hubic', "refresh_token", self.refresh_token)
             if self.access_token:
-                self.hubic_config.set('hubic', 'access_token', self.access_token)
+                self.hubic_config.set('hubic', "access_token", self.access_token)
             if self.token_expire:
-                self.hubic_config.set('hubic', 'token_expire', self.token_expire)
+                self.hubic_config.set('hubic', "token_expire", str(self.token_expire))
 
             self.hubic_config.add_section('openstack')
             if self.os_auth_token:
-                self.hubic_config.set('openstack', 'os_auth_token', self.os_auth_token)
+                self.hubic_config.set('openstack', "os_auth_token", self.os_auth_token)
             if self.os_storage_url:
-                self.hubic_config.set('openstack', 'os_storage_url', self.os_storage_url)
+                self.hubic_config.set('openstack', "os_storage_url", self.os_storage_url)
             if self.os_token_expire:
-                self.hubic_config.set('openstack', 'os_token_expire', self.os_token_expire)
+                self.hubic_config.set('openstack', "os_token_expire", str(self.os_token_expire))
 
-            with open(self.config_file, 'wb') as configfile:
+            with open(self.config_file, 'w') as configfile:
                 self.hubic_config.write(configfile)
-            os.chmod(self.config_file, 0600)
+            os.chmod(self.config_file, 0o600)
 
     def auth(self):
 
@@ -139,15 +141,15 @@ class hubic:
 
             # Request client app creds
             if not self.client_id:
-                self.client_id = raw_input('HUBIC_CLIENT_ID=')
+                self.client_id = input('HUBIC_CLIENT_ID=')
             if not self.client_secret:
-                self.client_secret = raw_input('HUBIC_CLIENT_SECRET=')
+                self.client_secret = input('HUBIC_CLIENT_SECRET=')
             if not self.redirect_uri:
-                self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
+                self.redirect_uri = input('HUBIC_REDIRECT_URI=')
 
             # Request Hubic account creds
             if not self.username:
-                self.username = raw_input('Username: ')
+                self.username = input('Username: ')
             if not self.password:
                 self.password = getpass()
 
@@ -159,18 +161,19 @@ class hubic:
                        'state' : 'none'}
 
             if options.verbose:
-                print "-- Request hubic oauth ID:"
+                print("-- Request hubic oauth ID:")
 
             r = requests.get(self.auth_url, params=payload, allow_redirects=False)
 
+            print(r.text)
             if r.status_code != 200:
-                print "Failed to request authorization code, please verify client_id or redirect_uri"
+                print("Failed to request authorization code, please verify client_id or redirect_uri")
                 sys.exit(1)
 
             try:
                 oauthid = re.search('(?<=<input type="hidden" name="oauth" value=")[0-9]*', r.text).group(0)
             except:
-                print "Failed to request authorization code, please verify client_id or redirect_uri"
+                print("Failed to request authorization code, please verify client_id or redirect_uri")
                 sys.exit(1)
 
 
@@ -192,7 +195,7 @@ class hubic:
             headers = {'content-type': 'application/x-www-form-urlencoded'}
 
             if options.verbose:
-                print "-- Request authorization code:"
+                print("-- Request authorization code:")
 
             r = requests.post(self.auth_url, data=data, headers=headers, allow_redirects=False)
 
@@ -200,7 +203,7 @@ class hubic:
                 location = urlparse(r.headers['location'])
                 self.oauth_code = dict(parse_qsl(location.query))['code']
             except:
-                print "Failed to request authorization code, please verify hubic username and password"
+                print("Failed to request authorization code, please verify hubic username and password")
                 sys.exit(2)
 
             return self.oauth_code
@@ -210,16 +213,16 @@ class hubic:
         if not self.access_token:
 
             if not self.oauth_code:
-                print "Cannot request token without oauth code"
+                print("Cannot request token without oauth code")
                 return
 
             if not self.client_id or not self.client_secret:
                 if not self.client_id:
-                    self.client_id = raw_input('HUBIC_CLIENT_ID=')
+                    self.client_id = input('HUBIC_CLIENT_ID=')
                 if not self.client_secret:
-                    self.client_secret = raw_input('HUBIC_CLIENT_SECRET=')
+                    self.client_secret = input('HUBIC_CLIENT_SECRET=')
                 if not self.redirect_uri:
-                    self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
+                    self.redirect_uri = input('HUBIC_REDIRECT_URI=')
 
 
             payload = {'code' : self.oauth_code,
@@ -227,14 +230,14 @@ class hubic:
                        'grant_type' : 'authorization_code'}
 
             if options.verbose:
-                print "-- Request access token:"
+                print("-- Request access token:")
 
             r = requests.post(self.token_url, payload,
                               auth=HTTPBasicAuth(self.client_id,self.client_secret),
                               allow_redirects=False)
 
             if r.status_code != 200:
-                print "%s : %s" % (r.json()['error'], r.json()['error_description'])
+                print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                 sys.exit(3)
 
             try:
@@ -244,12 +247,12 @@ class hubic:
                 self.token_type    = r.json()['token_type']
 
             except:
-                print "Something wrong has happened when requesting access token"
+                print("Something wrong has happened when requesting access token")
                 sys.exit(10)
 
-            print "HUBIC_ACCESS_TOKEN=%s" % self.access_token
-            print "HUBIC_REFRESH_TOKEN=%s" % self.refresh_token
-            print "HUBIC_TOKEN_EXPIRE=%s (%s)" % (self.token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire)))
+            print("HUBIC_ACCESS_TOKEN=%s" % self.access_token)
+            print("HUBIC_REFRESH_TOKEN=%s" % self.refresh_token)
+            print("HUBIC_TOKEN_EXPIRE=%s (%s)" % (self.token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire))))
         return self.access_token
 
     def refresh(self):
@@ -257,29 +260,29 @@ class hubic:
         self.token_url = 'https://api.hubic.com/oauth/token'
 
         if not self.refresh_token:
-            print "Cannot request new acces token without refresh token"
+            print("Cannot request new acces token without refresh token")
             sys.exit(4)
 
         if not self.client_id or not self.client_secret:
             if not self.client_id:
-                self.client_id = raw_input('HUBIC_CLIENT_ID=')
+                self.client_id = input('HUBIC_CLIENT_ID=')
             if not self.client_secret:
-                self.client_secret = raw_input('HUBIC_CLIENT_SECRET=')
+                self.client_secret = input('HUBIC_CLIENT_SECRET=')
             if not self.redirect_uri:
-                self.redirect_uri = raw_input('HUBIC_REDIRECT_URI=')
+                self.redirect_uri = input('HUBIC_REDIRECT_URI=')
 
         payload = {'refresh_token' : self.refresh_token,
                    'grant_type' : 'refresh_token'}
 
         if options.verbose:
-            print "-- Refresh access token:"
+            print("-- Refresh access token:")
 
         r = requests.post(self.token_url, payload,
                           auth=HTTPBasicAuth(self.client_id,self.client_secret),
                           allow_redirects=False)
 
         if r.status_code != 200:
-            print "%s : %s" % (r.json()['error'], r.json()['error_description'])
+            print("%s : %s" % (r.json()['error'], r.json()['error_description']))
             sys.exit(4)
 
         try:
@@ -288,11 +291,11 @@ class hubic:
             self.token_type    = r.json()['token_type']
 
         except:
-            print "Something wrong has happened when refreshing access token"
+            print("Something wrong has happened when refreshing access token")
             sys.exit(10)
 
-        print "HUBIC_ACCESS_TOKEN=%s" % self.access_token
-        print "HUBIC_TOKEN_EXPIRE=%s (%s)" % (self.token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire)))
+        print("HUBIC_ACCESS_TOKEN=%s" % self.access_token)
+        print("HUBIC_TOKEN_EXPIRE=%s (%s)" % (self.token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.token_expire))))
         return self.access_token
 
     def get(self, hubic_api):
@@ -302,10 +305,10 @@ class hubic:
         if self.access_token:
 
             if options.verbose:
-                print "-- GET request to hubic API : %s" % hubic_api
+                print("-- GET request to hubic API : %s" % hubic_api)
 
             if self.token_expire <= time():
-                print "-- Access token has expired, try to renew it"
+                print("-- Access token has expired, try to renew it")
                 self.refresh()
 
             bearer_auth = HTTPBearerAuth(self.access_token)
@@ -315,23 +318,23 @@ class hubic:
                 # Check if token is still valid
                 if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
-                    print "-- Access token has expired, try to renew it"
+                    print("-- Access token has expired, try to renew it")
                     self.refresh()
                     r = requests.get(hubic_api_url, auth=bearer_auth)
                 if r.status_code == 404 or r.status_code == 500:
-                    print "%s : %s" % (r.json()['code'], r.json()['message'])
+                    print("%s : %s" % (r.json()['code'], r.json()['message']))
                     return
 
                 if r.status_code != 200:
-                    print "%s : %s" % (r.json()['error'], r.json()['error_description'])
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     return
 
             except:
-                print "Something wrong has happened when accessing hubic API (GET request)"
+                print("Something wrong has happened when accessing hubic API (GET request)")
                 sys.exit(10)
 
             for keys in r.json():
-                print "%s : %s" % (keys,r.json()[keys])
+                print("%s : %s" % (keys,r.json()[keys]))
 
     def post(self, hubic_api, data):
 
@@ -340,10 +343,10 @@ class hubic:
         if self.access_token:
 
             if options.verbose:
-                print "-- POST request to hubic API : %s" % hubic_api
+                print("-- POST request to hubic API : %s" % hubic_api)
 
             if self.token_expire <= time():
-                print "-- Access token has expired, try to renew it"
+                print("-- Access token has expired, try to renew it")
                 self.refresh()
 
             headers = {'content-type': 'application/x-www-form-urlencoded'}
@@ -355,24 +358,24 @@ class hubic:
                 # Check if token is still valid
                 if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
-                    print "-- Access token has expired, try to renew it"
+                    print("-- Access token has expired, try to renew it")
                     self.refresh()
                     r = requests.post(hubic_api_url, auth=bearer_auth)
 
                 if r.status_code == 404 or r.status_code == 500:
-                    print "%s : %s" % (r.json()['code'], r.json()['message'])
+                    print("%s : %s" % (r.json()['code'], r.json()['message']))
                     return
 
                 if r.status_code != 200:
-                    print "%s : %s" % (r.json()['error'], r.json()['error_description'])
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     return
 
             except:
-                print "Something wrong has happened when accessing hubic API (POST request)"
+                print("Something wrong has happened when accessing hubic API (POST request)")
                 sys.exit(10)
 
             for keys in r.json():
-                print "%s : %s" % (keys,r.json()[keys])
+                print("%s : %s" % (keys,r.json()[keys]))
 
     def delete(self, hubic_api):
 
@@ -381,10 +384,10 @@ class hubic:
         if self.access_token:
 
             if options.verbose:
-                print "-- DELETE request to hubic API : %s" % hubic_api
+                print("-- DELETE request to hubic API : %s" % hubic_api)
 
             if self.token_expire <= time():
-                print "-- Access token has expired, try to renew it"
+                print("-- Access token has expired, try to renew it")
                 self.refresh()
 
             bearer_auth = HTTPBearerAuth(self.access_token)
@@ -394,24 +397,24 @@ class hubic:
                 # Check if token is still valid
                 if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
-                    print "-- Access token has expired, try to renew it"
+                    print("-- Access token has expired, try to renew it")
                     self.refresh()
                     r = requests.post(hubic_api_url, auth=bearer_auth)
 
                 if r.status_code == 404 or r.status_code == 500:
-                    print "%s : %s" % (r.json()['code'], r.json()['message'])
+                    print("%s : %s" % (r.json()['code'], r.json()['message']))
                     return
 
                 if r.status_code != 200:
-                    print "%s : %s" % (r.json()['error'], r.json()['error_description'])
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     return
 
             except:
-                print "Something wrong has happened when accessing hubic API (DELETE request)"
+                print("Something wrong has happened when accessing hubic API (DELETE request)")
                 sys.exit(10)
 
             for keys in r.json():
-                print "%s : %s" % (keys,r.json()[keys])
+                print("%s : %s" % (keys,r.json()[keys]))
 
     def swift(self, args):
 
@@ -423,18 +426,18 @@ class hubic:
 
                 # check access_token expired
                 if self.token_expire <= time():
-                    print "-- Access token has expired, try to renew it"
+                    print("-- Access token has expired, try to renew it")
                     self.refresh()
 
                 if options.verbose:
-                    print "-- Request OpenStack token and storage url:"
+                    print("-- Request OpenStack token and storage url:")
 
                 # We must first retrieve storage url and token
                 bearer_auth = HTTPBearerAuth(self.access_token)
                 r = requests.get(self.cred_url, auth=bearer_auth)
 
                 if r.status_code != 200:
-                    print "%s : %s" % (r.json()['error'], r.json()['error_description'])
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     sys.exit(6)
 
                 try:
@@ -447,15 +450,15 @@ class hubic:
                     self.os_token_expire -= (timezone + 3600)
 
                 except:
-                    print "Something wrong has happened when requesting hubic storage credentials"
+                    print("Something wrong has happened when requesting hubic storage credentials")
                     sys.exit(10)
 
-                print "OS_STORAGE_URL=%s" % self.os_storage_url
-                print "OS_AUTH_TOKEN=%s" % self.os_auth_token
-                print "OS_TOKEN_EXPIRE=%s (%s)" % (self.os_token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire)))
+                print("OS_STORAGE_URL=%s" % self.os_storage_url)
+                print("OS_AUTH_TOKEN=%s" % self.os_auth_token)
+                print("OS_TOKEN_EXPIRE=%s (%s)" % (self.os_token_expire, strftime('%Y-%m-%d %H:%M:%S %Z', localtime(self.os_token_expire))))
 
             if options.verbose:
-                print "-- Run swift client:"
+                print("-- Run swift client:")
 
             cmd = ['swift', "--os-auth-token", self.os_auth_token, '--os-storage-url', self.os_storage_url]
             cmd.extend(args)
@@ -581,3 +584,4 @@ if __name__ == '__main__':
         hubic.token()
         hubic.swift(args)
 
+    hubic.write_config()
