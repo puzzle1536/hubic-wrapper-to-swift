@@ -495,7 +495,7 @@ if __name__ == '__main__':
 
     parser.add_option("--data",
                       action="store", type="string", dest="data",
-                      help="url encoded date for POST request")
+                      help="url encoded data for POST request")
 
     parser.add_option("--delete",
                       action="store", type="string", dest="delete",
