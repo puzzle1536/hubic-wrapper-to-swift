@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import requests
-import json
 import subprocess
 import sys
 import os
@@ -96,7 +95,7 @@ class hubic:
         self.auth_url  = 'https://api.hubic.com/oauth/auth'
         self.oauth_code = None
 
-    def __del__(self):
+    def write_config(self):
         if self.config_file:
             if options.verbose:
                 print("-- Write config file back : %s " % self.config_file)
@@ -237,14 +236,14 @@ class hubic:
                               allow_redirects=False)
 
             if r.status_code != 200:
-                print("%s : %s" % (r.json['error'], r.json['error_description']))
+                print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                 sys.exit(3)
 
             try:
-                self.refresh_token = r.json['refresh_token']
-                self.access_token  = r.json['access_token']
-                self.token_expire  = time() + r.json['expires_in']
-                self.token_type    = r.json['token_type']
+                self.refresh_token = r.json()['refresh_token']
+                self.access_token  = r.json()['access_token']
+                self.token_expire  = time() + r.json()['expires_in']
+                self.token_type    = r.json()['token_type']
 
             except:
                 print("Something wrong has happened when requesting access token")
@@ -282,13 +281,13 @@ class hubic:
                           allow_redirects=False)
 
         if r.status_code != 200:
-            print("%s : %s" % (r.json['error'], r.json['error_description']))
+            print("%s : %s" % (r.json()['error'], r.json()['error_description']))
             sys.exit(4)
 
         try:
-            self.access_token  = r.json['access_token']
-            self.token_expire  = time() + r.json['expires_in']
-            self.token_type    = r.json['token_type']
+            self.access_token  = r.json()['access_token']
+            self.token_expire  = time() + r.json()['expires_in']
+            self.token_type    = r.json()['token_type']
 
         except:
             print("Something wrong has happened when refreshing access token")
@@ -316,25 +315,25 @@ class hubic:
 
             try:
                 # Check if token is still valid
-                if r.status_code == 401 and r.json['error'] == 'invalid_token' and r.json['error_description'] == 'expired':
+                if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
                     print("-- Access token has expired, try to renew it")
                     self.refresh()
                     r = requests.get(hubic_api_url, auth=bearer_auth)
                 if r.status_code == 404 or r.status_code == 500:
-                    print("%s : %s" % (r.json['code'], r.json['message']))
+                    print("%s : %s" % (r.json()['code'], r.json()['message']))
                     return
 
                 if r.status_code != 200:
-                    print("%s : %s" % (r.json['error'], r.json['error_description']))
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     return
 
             except:
                 print("Something wrong has happened when accessing hubic API (GET request)")
                 sys.exit(10)
 
-            for keys in r.json:
-                print("%s : %s" % (keys,r.json[keys]))
+            for keys in r.json():
+                print("%s : %s" % (keys,r.json()[keys]))
 
     def post(self, hubic_api, data):
 
@@ -356,26 +355,26 @@ class hubic:
 
             try:
                 # Check if token is still valid
-                if r.status_code == 401 and r.json['error'] == 'invalid_token' and r.json['error_description'] == 'expired':
+                if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
                     print("-- Access token has expired, try to renew it")
                     self.refresh()
                     r = requests.post(hubic_api_url, auth=bearer_auth)
 
                 if r.status_code == 404 or r.status_code == 500:
-                    print("%s : %s" % (r.json['code'], r.json['message']))
+                    print("%s : %s" % (r.json()['code'], r.json()['message']))
                     return
 
                 if r.status_code != 200:
-                    print("%s : %s" % (r.json['error'], r.json['error_description']))
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     return
 
             except:
                 print("Something wrong has happened when accessing hubic API (POST request)")
                 sys.exit(10)
 
-            for keys in r.json:
-                print("%s : %s" % (keys,r.json[keys]))
+            for keys in r.json():
+                print("%s : %s" % (keys,r.json()[keys]))
 
     def delete(self, hubic_api):
 
@@ -395,26 +394,26 @@ class hubic:
 
             try:
                 # Check if token is still valid
-                if r.status_code == 401 and r.json['error'] == 'invalid_token' and r.json['error_description'] == 'expired':
+                if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
                     print("-- Access token has expired, try to renew it")
                     self.refresh()
                     r = requests.post(hubic_api_url, auth=bearer_auth)
 
                 if r.status_code == 404 or r.status_code == 500:
-                    print("%s : %s" % (r.json['code'], r.json['message']))
+                    print("%s : %s" % (r.json()['code'], r.json()['message']))
                     return
 
                 if r.status_code != 200:
-                    print("%s : %s" % (r.json['error'], r.json['error_description']))
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     return
 
             except:
                 print("Something wrong has happened when accessing hubic API (DELETE request)")
                 sys.exit(10)
 
-            for keys in r.json:
-                print("%s : %s" % (keys,r.json[keys]))
+            for keys in r.json():
+                print("%s : %s" % (keys,r.json()[keys]))
 
     def swift(self, args):
 
@@ -437,14 +436,14 @@ class hubic:
                 r = requests.get(self.cred_url, auth=bearer_auth)
 
                 if r.status_code != 200:
-                    print("%s : %s" % (r.json['error'], r.json['error_description']))
+                    print("%s : %s" % (r.json()['error'], r.json()['error_description']))
                     sys.exit(6)
 
                 try:
-                    self.os_auth_token  = r.json['token']
-                    self.os_storage_url = r.json['endpoint']
+                    self.os_auth_token  = r.json()['token']
+                    self.os_storage_url = r.json()['endpoint']
                     # Extract 'CEST time' from 'expires' return value
-                    self.os_token_expire = mktime(strptime((r.json['expires'])[:-6],
+                    self.os_token_expire = mktime(strptime((r.json()['expires'])[:-6],
                                                   '%Y-%m-%dT%H:%M:%S'))
                     # Correct with local timezone
                     self.os_token_expire -= (timezone + 3600)
@@ -584,3 +583,4 @@ if __name__ == '__main__':
         hubic.token()
         hubic.swift(args)
 
+    hubic.write_config()

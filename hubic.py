@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import requests
-import json
 import subprocess
 import sys
 import os

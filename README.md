@@ -13,8 +13,9 @@ This is program is written in python and has only been tested on debian
 wheezy. It relies on a few python libraries (requests, ...). Please
 check hubic.py header for the complete list.
 
-The following packages should be enough to make it work on Debian
-`apt-get install swift python-requests` or using [pip](https://github.com/pypa/pip) `pip install -r requirements.txt`
+The following packages should be enough to make it work on Ubuntu 14.04
+`apt-get install python-swift python-requests` or using [pip](https://github.com/pypa/pip) `pip install -r
+requirements.txt`
 
 You must [register an application](https://hubic.com/home/browser/developers/) in your hubiC account to access the hubiC API.
 
@@ -112,8 +113,7 @@ the program will request them using "/account/credentials" API
 
 ### Python 3 compatibility
 
-`hubic.py` script is not compatible with python 3, use `hybic.py-3`instead or
-hybic.py-3.4 for python >= 3.4
+`hubic.py` script is not compatible with python 3, use `hybic.py-3`instead.
 
 Contact
 -------
