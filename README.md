@@ -99,13 +99,13 @@ If you want to perform a POST request, you can add URL encoded data with the
 
 This is useful if you encounter auth issues.
 
-    $ ./hubic -v
+    $ ./hubic.py -v
 
 ### Use the swift client to access hubiC OpenStack
 
 This program can act as a proxy to swift client.
 
-    $ ./hubic --swift -- list default
+    $ ./hubic.py --swift -- list default
 
 All parameters provided after "--" are forwarded to swift client.  If
 OS_AUTH_TOKEN and OS_STORAGE_URL are not already provided in the environment,
@@ -113,7 +113,7 @@ the program will request them using "/account/credentials" API
 
 ### Python 3 compatibility
 
-`hubic.py` script is not compatible with python 3, use `hybic.py-3`instead.
+`hubic.py` script is not compatible with python 3, use `hybic.py-3` instead.
 
 Contact
 -------
