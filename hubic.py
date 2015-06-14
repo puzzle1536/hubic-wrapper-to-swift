@@ -75,8 +75,8 @@ class hubic:
         self.client_secret = self.load_config('hubic', 'client_secret', options.hubic_client_secret, 'HUBIC_CLIENT_SECRET')
         self.redirect_uri  = self.load_config('hubic', 'redirect_uri',  options.hubic_redirect_uri,  'HUBIC_REDIRECT_URI')
 
-        self.username      = self.load_config('hubic', 'username', options.hubic_redirect_uri, 'HUBIC_USERNAME')
-        self.password      = self.load_config('hubic', 'password', options.hubic_redirect_uri, 'HUBIC_PASSWORD')
+        self.username      = self.load_config('hubic', 'username', options.hubic_username, 'HUBIC_USERNAME')
+        self.password      = self.load_config('hubic', 'password', options.hubic_password, 'HUBIC_PASSWORD')
 
         self.access_token  = self.load_config('hubic', 'access_token',  options.hubic_access_token,  'HUBIC_ACCESS_TOKEN')
         self.refresh_token = self.load_config('hubic', 'refresh_token', options.hubic_refresh_token, 'HUBIC_REFRESH_TOKEN')
