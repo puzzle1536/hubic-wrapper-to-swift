@@ -304,7 +304,7 @@ class hubic:
                 print "-- GET request to hubic API : %s" % hubic_api
 
             if self.token_expire <= time():
-                print "-- Access token has expired, try to renew it"
+                print "-- Access token has expired, trying to renew it"
                 self.refresh()
 
             bearer_auth = HTTPBearerAuth(self.access_token)
@@ -314,7 +314,7 @@ class hubic:
                 # Check if token is still valid
                 if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
-                    print "-- Access token has expired, try to renew it"
+                    print "-- Access token has expired, trying to renew it"
                     self.refresh()
                     r = requests.get(hubic_api_url, auth=bearer_auth)
                 if r.status_code == 404 or r.status_code == 500:
@@ -342,7 +342,7 @@ class hubic:
                 print "-- POST request to hubic API : %s" % hubic_api
 
             if self.token_expire <= time():
-                print "-- Access token has expired, try to renew it"
+                print "-- Access token has expired, trying to renew it"
                 self.refresh()
 
             headers = {'content-type': 'application/x-www-form-urlencoded'}
@@ -354,7 +354,7 @@ class hubic:
                 # Check if token is still valid
                 if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
-                    print "-- Access token has expired, try to renew it"
+                    print "-- Access token has expired, trying to renew it"
                     self.refresh()
                     r = requests.post(hubic_api_url, auth=bearer_auth)
 
@@ -383,7 +383,7 @@ class hubic:
                 print "-- DELETE request to hubic API : %s" % hubic_api
 
             if self.token_expire <= time():
-                print "-- Access token has expired, try to renew it"
+                print "-- Access token has expired, trying to renew it"
                 self.refresh()
 
             bearer_auth = HTTPBearerAuth(self.access_token)
@@ -393,7 +393,7 @@ class hubic:
                 # Check if token is still valid
                 if r.status_code == 401 and r.json()['error'] == 'invalid_token' and r.json()['error_description'] == 'expired':
                     # Try to renew if possible
-                    print "-- Access token has expired, try to renew it"
+                    print "-- Access token has expired, trying to renew it"
                     self.refresh()
                     r = requests.post(hubic_api_url, auth=bearer_auth)
 
@@ -422,7 +422,7 @@ class hubic:
 
                 # check access_token expired
                 if self.token_expire <= time():
-                    print "-- Access token has expired, try to renew it"
+                    print "-- Access token has expired, trying to renew it"
                     self.refresh()
 
                 if options.verbose:
